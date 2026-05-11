@@ -67,9 +67,8 @@ app.get('/api/health', (req, res) => {
 app.get('/api/heygen/avatars', async (req, res) => {
   try {
     const data = await heygen.listAvatars();
-    // Optimization: Only return public avatars and individual clones to reduce lag
+    // Optimization: Return all avatars without aggressive filtering
     const avatars = (data.data.avatars || [])
-      .filter(a => a.avatar_id === '4c334b6f436d4ec3b7ab872075027be8' || (a.avatar_name && a.avatar_name.toLowerCase().includes('suit'))) // Example filter for high-quality suits
       .map(a => ({
         id: a.avatar_id,
         name: a.avatar_name || a.avatar_id,
@@ -77,12 +76,6 @@ app.get('/api/heygen/avatars', async (req, res) => {
         default_voice_id: a.default_voice_id || null
       }));
     
-    // Add known important ID manually for testing if filtered out
-    const targetId = 'ce4eb991d06b4209882e04576086c313';
-    if (!avatars.find(a => a.id === targetId)) {
-      avatars.unshift({ id: targetId, name: 'Shiine Avatar (Custom)', preview_image: null, default_voice_id: '662adba1af7246a595fee67112d46dcd' });
-    }
-
     res.json({ success: true, avatars });
   } catch (err) {
     console.error('Error fetching avatars:', err.message);
@@ -94,13 +87,8 @@ app.get('/api/heygen/avatars', async (req, res) => {
 app.get('/api/heygen/voices', async (req, res) => {
   try {
     const data = await heygen.listVoices();
-    // Optimization: Filter for Somali-compatible (Multilingual) or Cloned voices
-    const voices = (data.data.voices || []).filter(v => 
-      v.language === 'Multilingual' || 
-      v.name.toLowerCase().includes('shiine') ||
-      v.name.toLowerCase().includes('clone') ||
-      v.language === 'Somali'
-    );
+    // Return all voices instead of aggressively filtering
+    const voices = data.data.voices || [];
     res.json({ success: true, voices });
   } catch (err) {
     console.error('Error fetching voices:', err.message);

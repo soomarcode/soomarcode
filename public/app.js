@@ -95,22 +95,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateVoices() {
         voiceSelect.innerHTML = '';
         
-        // Prioritize "Multilingual" or "Cloned" voices for Somali support
-        const priorityVoices = allVoices.filter(v => 
-            v.language === 'Multilingual' || 
-            v.name.toLowerCase().includes('shiine') ||
-            v.name.toLowerCase().includes('clone')
-        );
-
-        if (priorityVoices.length === 0) {
+        if (allVoices.length === 0) {
             const option = document.createElement('option');
             option.value = "";
-            option.textContent = "No compatible voices found";
+            option.textContent = "No voices found";
             voiceSelect.appendChild(option);
             return;
         }
 
-        priorityVoices.forEach(voice => {
+        // Sort to put cloned, Somali, or Multilingual voices at the top
+        const sortedVoices = [...allVoices].sort((a, b) => {
+            const aName = a.name.toLowerCase();
+            const bName = b.name.toLowerCase();
+            const aIsSomali = a.language === 'Somali' || aName.includes('somali') || aName.includes('shiine') || aName.includes('clone');
+            const bIsSomali = b.language === 'Somali' || bName.includes('somali') || bName.includes('shiine') || bName.includes('clone');
+            
+            if (aIsSomali && !bIsSomali) return -1;
+            if (!aIsSomali && bIsSomali) return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        sortedVoices.forEach(voice => {
             const option = document.createElement('option');
             option.value = voice.voice_id;
             option.textContent = `${voice.name} (${voice.language})`;
@@ -262,8 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===================== Step 3: Generate Video =====================
     btnCreateVideo.addEventListener('click', async () => {
-        if (!selectedAudioFile) {
+        if (currentMode === 'custom' && !selectedAudioFile) {
             alert('Please upload an audio file first.');
+            return;
+        }
+
+        if (currentMode === 'pro' && (!finalScript || !finalScript.value.trim())) {
+            alert('Please generate a script first.');
             return;
         }
 
