@@ -69,7 +69,7 @@ app.get('/api/heygen/avatars', async (req, res) => {
     const data = await heygen.listAvatars();
     // Optimization: Only return public avatars and individual clones to reduce lag
     const avatars = (data.data.avatars || [])
-      .filter(a => a.avatar_id === '4c334b6f436d4ec3b7ab872075027be8' || a.avatar_name.toLowerCase().includes('suit')) // Example filter for high-quality suits
+      .filter(a => a.avatar_id === '4c334b6f436d4ec3b7ab872075027be8' || (a.avatar_name && a.avatar_name.toLowerCase().includes('suit'))) // Example filter for high-quality suits
       .map(a => ({
         id: a.avatar_id,
         name: a.avatar_name || a.avatar_id,
