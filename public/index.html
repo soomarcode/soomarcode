@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiine - AI Ad Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shiine <span>AI Studio</span></h1>
+            <p>Generate highly converted Avatar Ads and publish directly to Facebook</p>
+        </header>
+
+        <main>
+            <!-- Step 1: Script Generation -->
+            <section class="card" id="step-1">
+                <div class="step-badge">1</div>
+                <h2>Generate Ad Script</h2>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="productName" placeholder="e.g. Aura Premium Abaya">
+                </div>
+                <div class="form-group">
+                    <label>Product Description</label>
+                    <textarea id="productDesc" rows="3" placeholder="Describe the product and offers..."></textarea>
+                </div>
+                <button id="btnGenerateScript" class="btn primary">Generate AI Script</button>
+                
+                <div class="script-editor hidden" id="scriptContainer">
+                    <label>Review & Edit Script (Somali)</label>
+                    <textarea id="finalScript" rows="6"></textarea>
+                </div>
+            </section>
+
+            <!-- Step 2: Avatar & Voice Section -->
+            <section class="card" id="step-2">
+                <div class="step-badge">2</div>
+                <h2>Configure Avatar & Voice</h2>
+                
+                <div class="mode-switcher">
+                    <button id="btnModePro" class="mode-btn active">
+                        <i class="fas fa-magic"></i> Pro AI Voice
+                    </button>
+                    <button id="btnModeCustom" class="mode-btn">
+                        <i class="fas fa-microphone"></i> My Real Voice
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="avatarSelect">1. Choose Professional Avatar</label>
+                    <select id="avatarSelect" class="custom-select">
+                        <option value="" disabled selected>Loading avatars from your account...</option>
+                    </select>
+                </div>
+
+                <!-- Pro AI Mode Section -->
+                <div id="sectionProVoice" class="form-group">
+                    <label for="voiceSelect">2. Select Professional Somali Voice</label>
+                    <select id="voiceSelect" class="custom-select">
+                        <option value="" disabled selected>Loading voices...</option>
+                    </select>
+                    <p class="helper-text" style="font-size:0.8rem; margin-top:-0.5rem; color:var(--text-muted);">These high-quality AI voices will narrate your script automatically.</p>
+                </div>
+
+                <!-- Custom Voice Mode Section -->
+                <div id="sectionCustomVoice" class="hidden">
+                    <label>2. Upload Your Voice Recording</label>
+                    <p class="helper-text" style="margin-bottom:0.75rem;">Record yourself reading the script above in Somali, then upload the file.</p>
+                    <div class="audio-upload-area" id="audioUploadArea">
+                        <div class="upload-icon">🎙️</div>
+                        <p class="upload-text">Drag & drop your voice file, or click to browse</p>
+                        <p class="upload-hint">Supports MP3, WAV, M4A, OGG, WebM (max 50MB)</p>
+                        <input type="file" id="audioFileInput" accept=".mp3,.wav,.m4a,.ogg,.webm,.mp4" hidden>
+                    </div>
+                </div>
+
+                <div class="audio-preview hidden" id="audioPreview">
+                    <div class="audio-file-info">
+                        <span class="audio-file-icon">🎵</span>
+                        <div class="audio-file-details">
+                            <span class="audio-file-name" id="audioFileName">voice_recording.mp3</span>
+                            <span class="audio-file-size" id="audioFileSize">2.4 MB</span>
+                        </div>
+                        <button class="btn-remove-audio" id="btnRemoveAudio" title="Remove">✕</button>
+                    </div>
+                    <audio id="audioPlayer" controls></audio>
+                </div>
+
+                <button id="btnCreateVideo" class="btn primary" disabled>Generate Avatar Video</button>
+                
+                <div class="progress-container hidden" id="uploadProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">Uploading audio...</p>
+                </div>
+            </section>
+
+            <!-- Step 3: Video Preview -->
+            <section class="card opacity-50" id="step-3">
+                <div class="step-badge">3</div>
+                <div class="video-header">
+                    <h2>Video Output</h2>
+                    <button class="btn-fullwide" id="btnFullWide" title="Toggle Full Wide Mode">
+                        <svg class="icon-expand" id="iconExpand" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <polyline points="9 21 3 21 3 15"></polyline>
+                            <line x1="21" y1="3" x2="14" y2="10"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
+                        </svg>
+                        <svg class="icon-collapse hidden" id="iconCollapse" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="4 14 10 14 10 20"></polyline>
+                            <polyline points="20 10 14 10 14 4"></polyline>
+                            <line x1="14" y1="10" x2="21" y2="3"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
+                        </svg>
+                        <span id="fullWideLabel">Full Wide</span>
+                    </button>
+                </div>
+                <div class="video-container" id="videoContainer">
+                    <div class="placeholder-text" id="videoStatus">Awaiting generation...</div>
+                    <video id="resultVideo" controls class="hidden"></video>
+                </div>
+            </section>
+
+            <!-- Step 4: Publish to Facebook -->
+            <section class="card opacity-50" id="step-4">
+                <div class="step-badge">4</div>
+                <h2>Publish Ad to Facebook</h2>
+                <div class="form-group">
+                    <label>Ad Headline</label>
+                    <input type="text" id="adHeadline" placeholder="e.g. Flash Sale! 50% Off">
+                </div>
+                <div class="form-group">
+                    <label>Facebook Campaign (Optional)</label>
+                    <select id="campaignSelect">
+                        <option value="">Create New Campaign</option>
+                    </select>
+                </div>
+                <button id="btnPublishAd" class="btn success" disabled>Publish to Facebook Ads</button>
+            </section>
+
+            <!-- Step 5: High Analytics -->
+            <section class="card" id="step-5">
+                <div class="step-badge" style="background:var(--success);">📈</div>
+                <h2>High Analytics Dashboard</h2>
+                <p class="helper-text">Compare Ad Performance & Cost Metrics</p>
+                <button id="btnLoadAnalytics" class="btn primary">Load Insights Data</button>
+                
+                <div class="analytics-grid hidden" id="analyticsDashboard">
+                    <div class="stat-box">
+                        <span class="stat-label">Total Spend</span>
+                        <span class="stat-value" id="totalSpend">$0.00</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Total Impressions</span>
+                        <span class="stat-value" id="totalImpressions">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Total Clicks</span>
+                        <span class="stat-value" id="totalClicks">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Avg CPC</span>
+                        <span class="stat-value" id="avgCpc">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Mock chart placeholder for premium aesthetic -->
+                <div class="chart-container hidden" id="chartContainer">
+                    <div class="chart-bars">
+                        <div class="bar" style="height: 60%;"><div class="bar-label">Ad 1</div></div>
+                        <div class="bar highlight" style="height: 90%;"><div class="bar-label">HeyGen Ad</div></div>
+                        <div class="bar" style="height: 40%;"><div class="bar-label">Ad 3</div></div>
+                        <div class="bar" style="height: 75%;"><div class="bar-label">Ad 4</div></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
